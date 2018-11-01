@@ -1,0 +1,343 @@
+import {
+    RemoteUiCheckboxStore,
+    RemoteUiEditorStore,
+    RemoteUiFieldStore, RemoteUiFileBase64Store,
+    RemoteUiGroupStore,
+    RemoteUiListItem,
+    RemoteUiListStore,
+    RemoteUiNullableStore,
+    RemoteUiObjectStore, RemoteUiPossibleValue,
+    RemoteUiSelectStore,
+    RemoteUiTextInputStore
+} from "./RemoteUiEditorStore";
+import * as React from "react";
+import {inject, observer, Provider} from "mobx-react";
+import {SortableContainer, SortableElement, SortableHandle} from "react-sortable-hoc";
+import "./RemoteUiEditor.css";
+import {observable} from "mobx";
+
+
+function isNullOrWhitespace(s: string | undefined | null): boolean {
+    if (s) {
+        if (s.length == 0)
+            return true;
+        return s.match(/^\s+$/) != null;
+    }
+    else return true;
+}
+
+const Error = observer(function(props: {error: string|undefined|null})
+{
+    if(props.error)
+        return <div className="remote-ui-error-string">{props.error}</div>;
+    return null;    
+});
+
+const ExpandLink = observer(function (props: { item: { isExpanded: boolean}, children: any  }) {
+    return <a href="#" style={{textDecoration: 'none'}} onClick={e => {
+        e.preventDefault();
+        props.item.isExpanded = !props.item.isExpanded;
+    }}>{props.item.isExpanded ? '-' : '+'} {props.children}</a>
+});
+
+const RemoteUiGroup = observer(function (props: { store: RemoteUiGroupStore }) {
+    const items = props.store.fields.map(f => <RemoteUiField item={f} key={f.id}/>);
+    if (props.store.name == null || props.store.name.length == 0)
+        return <div>{items}</div>;
+    return <div>
+        <h2><ExpandLink item={props.store}> {props.store.name}</ExpandLink></h2>
+        {props.store.isExpanded
+            ? <div className="remote-ui-group-items">
+                {items}
+            </div> : null}
+    </div>;
+});
+
+const RemoteUiObject = observer(function (props: { store: RemoteUiObjectStore }) {
+    return <div className="remote-ui-object">
+        {props.store.groups.map(g => <RemoteUiGroup store={g} key={g.name}/>)}
+    </div>;
+});
+
+const RemoteUiTextInput = observer(function (props: { store: RemoteUiTextInputStore }) {
+    return <input className="form-control"
+                  value={props.store.value == null ? "" : props.store.value}
+                  onChange={e => props.store.setValue(e.currentTarget.value)}/>;
+});
+
+const RemoteUiCheckbox = observer(function (props: { store: RemoteUiCheckboxStore }) {
+    return <input type="checkbox" checked={props.store.value}
+                  onChange={e => props.store.setValue(e.currentTarget.checked)}/>;
+});
+
+
+const RemoteUiSelect = inject("remoteUiEditorContext")(observer(function (props: { 
+    store: RemoteUiSelectStore, remoteUiEditorContext?: RemoteUiEditorContext })
+{
+    let selected = props.store.possibleValues.findIndex(v => props.store.value == v.id);
+    if (selected == -1)
+        selected = 0;
+    if (props.store.isSelect && props.remoteUiEditorContext!.remoteUiEditorCustomSelect)
+    {
+        const CustomSelect = props.remoteUiEditorContext!.remoteUiEditorCustomSelect!;
+        return <CustomSelect 
+            value={props.store.value}
+            values={props.store.possibleValues}
+            onChange={v=>props.store.value = v}
+        >
+            
+        </CustomSelect>;
+    }
+    if (props.store.isSelect)
+        return <select className="form-control" value={selected}
+                       onChange={e => props.store.value = props.store.possibleValues[parseInt(e.target.value)].id}>
+            {props.store.possibleValues.map((value, idx) =>
+                <option value={idx} key={idx}>{value.name}</option>)}
+        </select>;
+    return <div>
+        {props.store.possibleValues.map((value, idx) =>
+            <div className="radio" key={idx}>
+                <label>
+                    <input type="radio" value={idx} checked={idx == selected}
+                           onChange={e => props.store.value = props.store.possibleValues[parseInt(e.target.value)].id}/>
+                    <span>{value.name}</span>
+                </label>
+            </div>)}
+
+    </div>;
+}));
+
+
+const SortableItem = observer(SortableElement(observer((props: { store: RemoteUiListStore, item: RemoteUiListItem }) => {
+        return <table className="remote-ui-list-item">
+            <tbody>
+            <tr>
+                <Handle/>
+                <td>
+                    <Error error={props.item.error}/>
+                    <RemoteUiItemEditor store={props.item.item}/>
+                </td>
+                <td className="remote-ui-list-item-remove"><a href="#" className="btn btn-danger" onClick={e => {
+                    e.preventDefault();
+                    props.store.removeItem(props.item);
+                }}>X</a></td>
+            </tr>
+            </tbody>
+        </table>;
+    }
+)));
+
+const SortableList = observer(SortableContainer(observer((props: { store: RemoteUiListStore, }) => {
+    return <div>
+        {props.store.elements.map((item, idx) => <SortableItem index={idx} key={item.id} item={item}
+                                                               store={props.store}/>
+        )}
+    </div>
+})));
+
+const Handle = SortableHandle(() => <td className="remote-ui-list-item-handle"/>);
+
+const RemoteUiList = observer(function (props: { store: RemoteUiListStore }) {
+    return <div>
+        <SortableList store={props.store}
+                      onSortEnd={sort => {
+                          props.store.reorder(sort.oldIndex, sort.newIndex);
+                      }}
+                      useDragHandle={true}/>
+        <a href="#" className="btn btn-success" onClick={e => {
+            e.preventDefault();
+            props.store.addItem();
+        }}><b>+</b></a>
+    </div>;
+
+});
+
+@observer class RemoteUiFileBase64 extends React.Component<{store: RemoteUiFileBase64Store}>
+{
+    private inputRef: React.RefObject<HTMLInputElement>;
+    constructor(props :any)
+    {
+        super(props);
+        this.inputRef = React.createRef<HTMLInputElement>();
+    }
+    
+    render()
+    {
+        const i= this.props.store;
+        const selectFile = () => {
+            if(this.inputRef.current)
+                this.inputRef.current.click();
+        };
+          
+        return <div>
+            <input name="RemoteUi" type="file"
+                   style={{opacity: 0, position: 'absolute', top:0, left:0, }}
+                   ref={this.inputRef} onChange={e=>{
+                i.setNewFile(e.currentTarget.files![0])
+            }}/>
+            {(i.file || i.useOldFile)
+                ?<table className="remote-ui-list-item">
+                    <tbody>
+                    <tr>
+                        <td>
+                            {i.useOldFile ? "Existing file" : "Upload " + i.file!.name}
+                        </td>
+                        <td className="remote-ui-list-item-remove">
+                            {i.nullable ?
+                                <a href="#" className="btn btn-danger" onClick={e => {
+                                    e.preventDefault();
+                                    i.delete();
+                                }}>X</a> : null}&nbsp;
+                            <a href="#" className="btn btn-primary" onClick={e => {
+                                e.preventDefault();
+                                selectFile();
+                            }}>Replace</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                :<div className="remote-ui-nullable-add-container"
+                      onClick={e => {
+                          e.preventDefault();
+                          selectFile();
+                      }}>
+                    <a href="#" className="btn btn-success"><b>+</b></a>&nbsp;
+                    {i.hadOldFile ? <a href="#" className="btn btn-danger" onClick={e=>{
+                        e.preventDefault();
+                        e.stopPropagation();
+                        i.useOld();
+                    }}><b>Use old</b></a> : null}
+
+                </div>}
+        </div>;
+    }
+}
+
+
+const RemoteUiNullable = observer(function (props: {store: RemoteUiNullableStore}) {
+    const i= props.store;
+    if (i.inner)
+        return <table className="remote-ui-list-item">
+            <tbody>
+            <tr>
+                <td>
+                    <RemoteUiItemEditor store={i.inner}/>
+                </td>
+                <td className="remote-ui-list-item-remove"><a href="#" className="btn btn-danger" onClick={e => {
+                    e.preventDefault();
+                    i.deleteInner();
+                }}>X</a></td>
+            </tr>
+            </tbody>
+        </table>;
+    return <div className="remote-ui-nullable-add-container"
+                onClick={e => {
+                    e.preventDefault();
+                    i.createInner();
+                }}>
+        <a href="#" className="btn btn-success" ><b>+</b></a>
+    </div>
+});
+
+const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: { 
+    item: RemoteUiFieldStore,
+    remoteUiEditorContext?: RemoteUiEditorContext }): any 
+{
+    const Description = () => {
+        return isNullOrWhitespace(props.item.description) ? null
+            : <div className="remote-ui-description">{props.item.description}</div>;
+    };
+    const error = props.item.error || (props.remoteUiEditorContext!.highlightErrors && !props.item.isValid);
+    const labelClass = error ? "remote-ui-error" : "";
+
+    if (props.item.control instanceof RemoteUiCheckboxStore)
+        return <div>
+            <Error error={props.item.error}/>
+            <label className={"form-check-label " + labelClass}><RemoteUiCheckbox store={props.item.control}/> {props.item.name}
+            </label>
+            <Description/>
+        </div>;
+    if (props.item.control instanceof RemoteUiObjectStore)
+        return <div>
+            <label className={labelClass}><ExpandLink item={props.item}> {props.item.name}</ExpandLink></label>
+            <Error error={props.item.error}/>
+            {props.item.isExpanded
+                ? <>
+                    <Description/>
+                    <RemoteUiItemEditor store={props.item.control}/>
+                </>
+                : null}
+        </div>;
+    return <div>
+        <label className={labelClass}>{props.item.name}</label>
+        <Description/>
+        <Error error={props.item.error}/>
+        <RemoteUiItemEditor store={props.item.control}/>
+    </div>;
+}));
+
+const RemoteUiItemEditor = observer(function (props: { store: any }): any {
+    if (props.store instanceof RemoteUiObjectStore)
+        return <RemoteUiObject store={props.store}/>;
+    else if (props.store instanceof RemoteUiTextInputStore)
+        return <RemoteUiTextInput store={props.store}/>;
+    else if (props.store instanceof RemoteUiCheckboxStore)
+        return <RemoteUiCheckbox store={props.store}/>;
+    else if (props.store instanceof RemoteUiSelectStore) {
+        return <RemoteUiSelect store={props.store}/>;
+    }
+    else if (props.store instanceof RemoteUiListStore)
+        return <RemoteUiList store={props.store}/>;
+    else if(props.store instanceof RemoteUiFileBase64Store)
+        return <RemoteUiFileBase64 store={props.store}/>;
+    else if (props.store instanceof RemoteUiNullableStore)
+        return <RemoteUiNullable store={props.store}/>;
+    else
+        return <div>Unknown field type</div>;
+});
+
+export interface RemoteUiEditorCustomSelectProps
+{
+    values: RemoteUiPossibleValue[];
+    value: string;
+    onChange: (v: string) => void; 
+}
+interface CustomSelect {
+    (props: RemoteUiEditorCustomSelectProps): any;
+}
+
+class RemoteUiEditorContext
+{
+    @observable.ref remoteUiEditorCustomSelect?: CustomSelect;
+    @observable highlightErrors: boolean;
+}
+
+export class RemoteUiEditor extends React.Component<{ store: RemoteUiEditorStore,
+    customSelect?: CustomSelect,
+    highlightErrors?: boolean},
+    {
+        context: RemoteUiEditorContext
+    }
+    > {
+    constructor(props: any)
+    {
+        super(props);
+        this.state ={context: new RemoteUiEditorContext()};
+    }
+    
+    componentDidUpdate()
+    {
+        this.state.context.highlightErrors = this.props.highlightErrors == true;
+        this.state.context.remoteUiEditorCustomSelect = this.props.customSelect;
+    }
+    
+    render() {
+        if (this.props.store == null)
+            return null;
+        return <div className="remote-ui-editor">
+            <Provider remoteUiEditorContext={this.state.context}>
+                <RemoteUiItemEditor store={this.props.store.rootObject}/>
+            </Provider>
+        </div>
+    }
+}

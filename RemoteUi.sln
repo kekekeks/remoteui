@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteUi", "RemoteUi\RemoteUi.csproj", "{CFA3764D-56BD-4D99-B0E8-FF8222EC3F41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Playground\Playground.csproj", "{01D9079E-4265-467A-95EC-8967A5989004}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFA3764D-56BD-4D99-B0E8-FF8222EC3F41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA3764D-56BD-4D99-B0E8-FF8222EC3F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA3764D-56BD-4D99-B0E8-FF8222EC3F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA3764D-56BD-4D99-B0E8-FF8222EC3F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01D9079E-4265-467A-95EC-8967A5989004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01D9079E-4265-467A-95EC-8967A5989004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01D9079E-4265-467A-95EC-8967A5989004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01D9079E-4265-467A-95EC-8967A5989004}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
