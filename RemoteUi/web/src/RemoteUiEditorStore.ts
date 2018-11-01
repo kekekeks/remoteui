@@ -298,10 +298,18 @@ export class RemoteUiTextInputStore implements IRemoteUiData {
         else if (this._type == PredefinedTypes.Number) {
             try {
                 const parsed = parseFloat(value);
-                if (isNaN(parsed))
+                if (isNaN(parsed)) {
                     this.value = '';
-                else
+                } else if (value.endsWith('.')) {
+                    const dots = value.match(/\./g) || [];
+                    if (dots.length <= 1) {
+                        this.value = parsed.toString() + '.';
+                    } else {
+                        this.value = parsed.toString();
+                    }
+                } else {
                     this.value = parsed.toString();
+                }
             }
             catch {
 
