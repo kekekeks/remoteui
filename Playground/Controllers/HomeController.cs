@@ -66,5 +66,8 @@ namespace Playground.Controllers
         
         [RemoteUiField("ListOfObjects")]
         public List<DtoBase> ListOfObjects { get; set; }
+        
+        [RemoteUiField("Some float")]
+        public decimal SomeFloat { get; set; }
     }
 }
