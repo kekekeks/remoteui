@@ -299,9 +299,13 @@ namespace RemoteUi
                         type = RemoteUiFieldType.Integer;
                         nullable = true;
                     }
-                    else if (ptype == typeof(decimal))
+                    else if (ptype == typeof(decimal) ||
+                             ptype == typeof(float) ||
+                             ptype == typeof(double))
                         type = RemoteUiFieldType.Number;
-                    else if (ptype == typeof(decimal?))
+                    else if (ptype == typeof(decimal?) ||
+                             ptype == typeof(float?) ||
+                             ptype == typeof(double?))
                     {
                         type = RemoteUiFieldType.Number;
                         nullable = true;
