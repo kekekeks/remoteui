@@ -290,11 +290,22 @@ namespace RemoteUi
                         type = RemoteUiFieldType.String;
                     else if (typeof(IEnumerable<string>).IsAssignableFrom(ptype))
                         type = RemoteUiFieldType.StringList;
-                    else if (ptype == typeof(int))
+                    else if (ptype == typeof(int) ||
+                             ptype == typeof(long))
                         type = RemoteUiFieldType.Integer;
-                    else if (ptype == typeof(decimal))
+                    else if (ptype == typeof(int?) ||
+                             ptype == typeof(long?))
+                    {
+                        type = RemoteUiFieldType.Integer;
+                        nullable = true;
+                    }
+                    else if (ptype == typeof(decimal) ||
+                             ptype == typeof(float) ||
+                             ptype == typeof(double))
                         type = RemoteUiFieldType.Number;
-                    else if (ptype == typeof(decimal?))
+                    else if (ptype == typeof(decimal?) ||
+                             ptype == typeof(float?) ||
+                             ptype == typeof(double?))
                     {
                         type = RemoteUiFieldType.Number;
                         nullable = true;
