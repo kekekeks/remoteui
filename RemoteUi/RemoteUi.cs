@@ -186,8 +186,9 @@ namespace RemoteUi
 
     public class RemoteUiBuilder
     {
-        private readonly Type _root;
         private readonly IEnumerable<IExtraRemoteUiField> _rootExtraFields;
+        private readonly Func<string, string> _displayTransform;
+        private readonly Type _root;
 
         class FieldGroup
         {
@@ -201,10 +202,13 @@ namespace RemoteUi
         private readonly List<(Type type, IEnumerable<IExtraRemoteUiField> fields)> _types =
             new List<(Type type, IEnumerable<IExtraRemoteUiField> fields)>();
 
-        public RemoteUiBuilder(Type root, IEnumerable<IExtraRemoteUiField> extraFields)
+        public RemoteUiBuilder(Type root, 
+            IEnumerable<IExtraRemoteUiField> extraFields, 
+            Func<string, string> displayTransform = null)
         {
             _root = root;
             _rootExtraFields = extraFields;
+            _displayTransform = displayTransform;
         }
 
         public RemoteUiBuilder Register(Type type, IEnumerable<IExtraRemoteUiField> fields, string name = null)
@@ -216,16 +220,15 @@ namespace RemoteUi
 
         public JObject Build(IServiceProvider sp)
         {
-            var root = Get(sp, _root, _registeredTypes, _rootExtraFields);
+            var root = Get(sp, _root, _registeredTypes, _rootExtraFields, _displayTransform);
             root["types"] = JObject.FromObject(_types.ToDictionary(t => _registeredTypes[t.type],
-                t => Get(sp, t.type, _registeredTypes, t.fields)));
+                t => Get(sp, t.type, _registeredTypes, t.fields, _displayTransform)));
             return root;
         }
 
-
         public JsonSerializer GetSerializer() => new JsonSerializer
         {
-            ContractResolver =GetResolver(),
+            ContractResolver = GetResolver(),
             Converters = {new StringEnumConverter()}
         };
 
@@ -244,17 +247,18 @@ namespace RemoteUi
             Converters = {new StringEnumConverter()}
         };
 
-        static JObject Get(IServiceProvider services, Type typee, Dictionary<Type, string> typeRegistry,
-            IEnumerable<IExtraRemoteUiField> extraFields)
+        static JObject Get(
+            IServiceProvider services, Type typee, 
+            Dictionary<Type, string> typeRegistry,
+            IEnumerable<IExtraRemoteUiField> extraFields,
+            Func<string, string> displayResolver)
         {
-
             var groups = typee.GetCustomAttributes<RemoteUiFieldGroup>()
                 .Select(x => new FieldGroup
                 {
                     Id = x.Id,
                     Name = x.Name
                 }).ToList();
-
 
             var generalGroup = groups.FirstOrDefault(x => x.Id == "");
             if (generalGroup == null)
@@ -325,12 +329,22 @@ namespace RemoteUi
                         throw new InvalidProgramException("Unknown remote field type");
                 }
 
+                var name = attr.Name;
+                var description = attr.Description;
+                if (displayResolver != null)
+                {
+                    if (description != null) 
+                        description = displayResolver(description);
+                    if (name != null)
+                        name = displayResolver(name);
+                }
+
                 var field = new JObject
                 {
+                    ["name"] = name,
                     ["id"] = prop.Name,
-                    ["name"] = attr.Name,
                     ["type"] = type.ToString(),
-                    ["description"] = attr.Description,
+                    ["description"] = description,
                 };
                 if (nullable)
                     field["nullable"] = true;
