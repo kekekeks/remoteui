@@ -362,11 +362,13 @@ export class RemoteUiSelectStore implements IRemoteUiData {
 }
 
 export class RemoteUiFileBase64Store implements IRemoteUiData {
-    readonly oldFileString = "<FILE>";
+    private readonly oldValue: string;
+    
     constructor(nullable: boolean, value: string) {
         this.nullable = nullable;
-        this.hadOldFile = value == this.oldFileString;
+        this.hadOldFile = !!value;
         this.useOldFile = this.hadOldFile;
+        this.oldValue = value;
     }
     
     @observable hadOldFile : boolean;
@@ -378,7 +380,7 @@ export class RemoteUiFileBase64Store implements IRemoteUiData {
     getData() : Promise<any> | any
     {
         if(this.useOldFile)
-            return this.oldFileString;
+            return this.oldValue;
         if(this.file == null)
             return null;
         var rdr = new FileReader();
