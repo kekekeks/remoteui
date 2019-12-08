@@ -268,7 +268,7 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
                 : null}
         </div>;
     return <div>
-        <label className={labelClass}>{props.item.name}</label>
+        {isNullOrWhitespace(props.item.name) ? null :  <label className={labelClass}>{props.item.name}</label>}
         <Description/>
         <Error error={props.item.error}/>
         <RemoteUiItemEditor store={props.item.control}/>
