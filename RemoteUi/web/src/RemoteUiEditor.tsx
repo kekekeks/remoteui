@@ -1,4 +1,5 @@
 import {
+    IRemoteUiData,
     RemoteUiCheckboxStore,
     RemoteUiEditorStore,
     RemoteUiFieldStore, RemoteUiFileBase64Store,
@@ -81,12 +82,10 @@ const RemoteUiSelect = inject("remoteUiEditorContext")(observer(function (props:
     {
         const CustomSelect = props.remoteUiEditorContext!.remoteUiEditorCustomSelect!;
         return <CustomSelect 
-            value={props.store.value}
+            value={props.store.value!}
             values={props.store.possibleValues}
             onChange={v=>props.store.value = v}
-        >
-            
-        </CustomSelect>;
+        />;
     }
     if (props.store.isSelect)
         return <select className="form-control" value={selected}
@@ -108,7 +107,7 @@ const RemoteUiSelect = inject("remoteUiEditorContext")(observer(function (props:
 }));
 
 
-const SortableItem = observer(SortableElement(observer((props: { store: RemoteUiListStore, item: RemoteUiListItem }) => {
+const SortableItem = observer(SortableElement(observer((props: { store: RemoteUiListStore, item: RemoteUiListItem }) : any => {
         return <table className="remote-ui-list-item">
             <tbody>
             <tr>
@@ -125,9 +124,9 @@ const SortableItem = observer(SortableElement(observer((props: { store: RemoteUi
             </tbody>
         </table>;
     }
-)));
+)))
 
-const SortableList = observer(SortableContainer(observer((props: { store: RemoteUiListStore, }) => {
+const SortableList = observer(SortableContainer(observer((props: { store: RemoteUiListStore }) : any => {
     return <div>
         {props.store.elements.map((item, idx) => <SortableItem index={idx} key={item.id} item={item}
                                                                store={props.store}/>
@@ -214,7 +213,7 @@ const RemoteUiList = observer(function (props: { store: RemoteUiListStore }) {
 }
 
 
-const RemoteUiNullable = observer(function (props: {store: RemoteUiNullableStore}) {
+const RemoteUiNullable = observer(function (props: {store: RemoteUiNullableStore}) : any {
     const i= props.store;
     if (i.inner)
         return <table className="remote-ui-list-item">
@@ -276,7 +275,15 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
     </div>;
 }));
 
-const RemoteUiItemEditor = observer(function (props: { store: any }): any {
+
+const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(function (props: {
+    store: any, remoteUiEditorContext?: RemoteUiEditorContext }) {
+    if(props.remoteUiEditorContext && props.remoteUiEditorContext.customization)
+    {
+        const resolved = props.remoteUiEditorContext.customization.getEditorFor(props.store);
+        if(resolved)
+            return resolved;
+    }
     if (props.store instanceof RemoteUiObjectStore)
         return <RemoteUiObject store={props.store}/>;
     else if (props.store instanceof RemoteUiTextInputStore)
@@ -294,7 +301,8 @@ const RemoteUiItemEditor = observer(function (props: { store: any }): any {
         return <RemoteUiNullable store={props.store}/>;
     else
         return <div>Unknown field type</div>;
-});
+}));
+
 
 export interface RemoteUiEditorCustomSelectProps
 {
@@ -310,11 +318,18 @@ class RemoteUiEditorContext
 {
     @observable.ref remoteUiEditorCustomSelect?: CustomSelect;
     @observable highlightErrors: boolean;
+    @observable.ref customization?: IRemoteUiEditorCustomization;
+}
+
+export interface IRemoteUiEditorCustomization
+{
+    getEditorFor(store: IRemoteUiData) : any;
 }
 
 export class RemoteUiEditor extends React.Component<{ store: RemoteUiEditorStore,
     customSelect?: CustomSelect,
-    highlightErrors?: boolean},
+    highlightErrors?: boolean,
+    customization?: IRemoteUiEditorCustomization},
     {
         context: RemoteUiEditorContext
     }
@@ -323,12 +338,14 @@ export class RemoteUiEditor extends React.Component<{ store: RemoteUiEditorStore
     {
         super(props);
         this.state ={context: new RemoteUiEditorContext()};
+        this.componentDidUpdate();
     }
     
     componentDidUpdate()
     {
         this.state.context.highlightErrors = this.props.highlightErrors == true;
         this.state.context.remoteUiEditorCustomSelect = this.props.customSelect;
+        this.state.context.customization = this.props.customization;
     }
     
     render() {

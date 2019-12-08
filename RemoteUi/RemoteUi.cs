@@ -19,7 +19,8 @@ namespace RemoteUi
         StringList,
         List,
         Number,
-        FileBase64
+        FileBase64,
+        Custom
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -29,6 +30,7 @@ namespace RemoteUi
         public string Group { get; set; }
         public object Type { get; set; }
         public object ListType { get; set; }
+        public string CustomType { get; set; }
         public bool Nullable { get; set; }
         public string Description { get; set; }
 
@@ -346,6 +348,8 @@ namespace RemoteUi
                     ["type"] = type.ToString(),
                     ["description"] = description,
                 };
+                if (attr?.CustomType != null)
+                    field["customType"] = attr.CustomType; 
                 if (nullable)
                     field["nullable"] = true;
                 if (listType != null)

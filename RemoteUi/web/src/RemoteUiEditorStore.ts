@@ -19,7 +19,8 @@ enum PredefinedTypes {
     List = "List",
     Radio = "Radio",
     Select = "Select",
-    FileBase64 = "FileBase64"
+    FileBase64 = "FileBase64",
+    Custom = "Custom"
 }
 
 export interface RemoteUiPossibleValue {
@@ -35,7 +36,8 @@ export interface RemoteUiFieldDefinition {
     type: string;
     listType?: string;
     possibleValues?: RemoteUiPossibleValue[],
-    nullable?: boolean
+    nullable?: boolean,
+    customType: string
 }
 
 export interface RemoteUiFieldGroupDefinition {
@@ -51,24 +53,33 @@ export interface RemoteUiDefinition extends RemoteUiTypeDefinition {
     types: { [key: string]: RemoteUiTypeDefinition };
 }
 
-interface IRemoteUiData {
+export interface RemoteUiEditorConfiguration
+{
+    definition: RemoteUiDefinition;
+    customization?: IRemoteUiEditorStoreCustomization;
+}
+
+export interface IRemoteUiData {
     getData(): any | Promise<any>;
     setErrors?(data: any) : void;
     isValid: boolean;
 }
 
-function getControlForType(def: RemoteUiDefinition,
+function getControlForType(config: RemoteUiEditorConfiguration,
                            type: string,
                            listType: string | undefined | null,
+                           customType: string | undefined | null,
                            nullable: boolean | null | undefined,
                            possibleValues: RemoteUiPossibleValue[]|undefined|null,
                            value: any): IRemoteUiData {
+    const def = config.definition;
     if (type == PredefinedTypes.Number || type == PredefinedTypes.Integer || type == PredefinedTypes.String)
         return new RemoteUiTextInputStore(type, nullable == true, value as string);
     if (type == PredefinedTypes.CheckBox)
         return new RemoteUiCheckboxStore(value == true);
     if(type == PredefinedTypes.FileBase64)
         return new RemoteUiFileBase64Store(nullable == true, value);
+    
     const factory = function(): IRemoteUiData {
 
         if (type == PredefinedTypes.StringList) {
@@ -78,11 +89,22 @@ function getControlForType(def: RemoteUiDefinition,
         if (type == PredefinedTypes.Radio || type == PredefinedTypes.Select)
             return new RemoteUiSelectStore(type, possibleValues!, nullable == true, value);
         if (type == PredefinedTypes.List)
-            return new RemoteUiListStore(def, listType as string, value);
+            return new RemoteUiListStore(config, listType as string, value);
+        if(type == PredefinedTypes.Custom)
+        {
+            if(config.customization == null)
+                throw new Error("Field has Custom type, but no customization provider is configured");
+            if(type == PredefinedTypes.Custom && customType == null)
+                throw new Error("Field has Custom type, but CustomType is not set");
+            const customStore = config.customization.getCustomStore(config, customType!, value);
+            if(customStore == null)
+                throw  new Error("Unable to resolve store for custom type " + customType);
+            return customStore;
+        }
         const typeDef = def.types[type];
         if (typeDef == null)
             throw "Unknown type: " + type;
-        return new RemoteUiObjectStore(def, typeDef, value);
+        return new RemoteUiObjectStore(config, typeDef, value);
     };
     if (nullable == true)
         return new RemoteUiNullableStore(factory, value != null);
@@ -104,12 +126,12 @@ export class RemoteUiObjectStore implements IRemoteUiData {
 
     @observable groups: RemoteUiGroupStore[];
 
-    constructor(def: RemoteUiDefinition, typeDef: RemoteUiTypeDefinition, value: any) {
+    constructor(config: RemoteUiEditorConfiguration, typeDef: RemoteUiTypeDefinition, value: any) {
 
         this.groups = typeDef.groups.map(
             g => new RemoteUiGroupStore(g.name, g.fields.map(field =>
                 new RemoteUiFieldStore(field,
-                    getControlForType(def, field.type, field.listType,
+                    getControlForType(config, field.type, field.listType, field.customType,
                         field.nullable, field.possibleValues!,
                         value == null ? null : value[field.id])))));
     }
@@ -145,22 +167,22 @@ export class RemoteUiObjectStore implements IRemoteUiData {
 
 export class RemoteUiListStore implements IRemoteUiData {
     @observable elements: IObservableArray<RemoteUiListItem>;
-    private def: RemoteUiDefinition;
     private listType: string;
+    private config: RemoteUiEditorConfiguration;
 
-    constructor(def: RemoteUiDefinition, listType: string, value: any[]) {
-        this.def = def;
+    constructor(config: RemoteUiEditorConfiguration, listType: string, value: any[]) {
+        this.config = config;
         this.listType = listType;
         if (value == null || !Array.isArray(value)) {
             this.elements = observable.array([]);
             return;
         }
         this.elements = observable.array(value.map(element => new RemoteUiListItem(
-            getControlForType(def, listType, null, null, null, element))));
+            getControlForType(config, listType, null, null, null, null, element))));
     }
 
     getData(): any {
-        return Promise.all(observable.array(this.elements.map(async e => await e.item.getData())))
+        return Promise.all(observable.array(this.elements.map(async (e : RemoteUiListItem) => await e.item.getData())))
     }
     
     @computed get isValid(){
@@ -180,7 +202,7 @@ export class RemoteUiListStore implements IRemoteUiData {
     {
         this.elements.push(
             new RemoteUiListItem(
-                getControlForType(this.def, this.listType, null, null, null, null)));
+                getControlForType(this.config, this.listType, null, null, null, null, null)));
     }
 
     @action removeItem(item: RemoteUiListItem) {
@@ -447,11 +469,18 @@ export class RemoteUiNullableStore implements IRemoteUiData {
     }
 }
 
+export interface IRemoteUiEditorStoreCustomization {
+    getCustomStore(config : RemoteUiEditorConfiguration, type : string, data : any) : IRemoteUiData;
+}
+
 export class RemoteUiEditorStore {
     @observable rootObject: RemoteUiObjectStore;
 
-    constructor(def: RemoteUiDefinition, data: any) {
-        this.rootObject = new RemoteUiObjectStore(def, def, data);
+    constructor(def: RemoteUiDefinition, data: any, customization? : IRemoteUiEditorStoreCustomization) {
+        this.rootObject = new RemoteUiObjectStore({
+            definition: def,
+            customization: customization
+        }, def, data);
     }
 
     @action setErrors(errors: any)
