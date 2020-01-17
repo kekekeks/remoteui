@@ -276,7 +276,7 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
 }));
 
 
-const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(function (props: {
+export const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(function (props: {
     store: any, remoteUiEditorContext?: RemoteUiEditorContext }) {
     if(props.remoteUiEditorContext && props.remoteUiEditorContext.customization)
     {
