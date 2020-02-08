@@ -8,7 +8,7 @@ import {
     RemoteUiListStore,
     RemoteUiNullableStore,
     RemoteUiObjectStore, RemoteUiPossibleValue,
-    RemoteUiSelectStore,
+    RemoteUiSelectStore, RemoteUiTextAreaStore,
     RemoteUiTextInputStore
 } from "./RemoteUiEditorStore";
 import * as React from "react";
@@ -64,6 +64,12 @@ const RemoteUiTextInput = observer(function (props: { store: RemoteUiTextInputSt
     return <input className="form-control"
                   value={props.store.value == null ? "" : props.store.value}
                   onChange={e => props.store.setValue(e.currentTarget.value)}/>;
+});
+
+const RemoteUiTextArea = observer(function (props: { store: RemoteUiTextAreaStore }) {
+    return <textarea className="form-control"
+                     value={props.store.value == null ? "" : props.store.value}
+                     onChange={e => props.store.setValue(e.currentTarget.value)}></textarea>;
 });
 
 const RemoteUiCheckbox = observer(function (props: { store: RemoteUiCheckboxStore }) {
@@ -288,6 +294,8 @@ export const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(funct
         return <RemoteUiObject store={props.store}/>;
     else if (props.store instanceof RemoteUiTextInputStore)
         return <RemoteUiTextInput store={props.store}/>;
+    else if (props.store instanceof RemoteUiTextAreaStore)
+        return <RemoteUiTextArea store={props.store}/>;
     else if (props.store instanceof RemoteUiCheckboxStore)
         return <RemoteUiCheckbox store={props.store}/>;
     else if (props.store instanceof RemoteUiSelectStore) {

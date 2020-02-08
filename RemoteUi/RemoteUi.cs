@@ -20,7 +20,8 @@ namespace RemoteUi
         List,
         Number,
         FileBase64,
-        Custom
+        Custom,
+        TextArea
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -102,6 +103,7 @@ namespace RemoteUi
                 return t;
             switch (type)
             {
+                case RemoteUiFieldType.TextArea:
                 case RemoteUiFieldType.String:
                 case RemoteUiFieldType.Radio:
                 case RemoteUiFieldType.Select:

@@ -20,7 +20,8 @@ enum PredefinedTypes {
     Radio = "Radio",
     Select = "Select",
     FileBase64 = "FileBase64",
-    Custom = "Custom"
+    Custom = "Custom",
+    TextArea = "TextArea"
 }
 
 export interface RemoteUiPossibleValue {
@@ -75,6 +76,8 @@ function getControlForType(config: RemoteUiEditorConfiguration,
     const def = config.definition;
     if (type == PredefinedTypes.Number || type == PredefinedTypes.Integer || type == PredefinedTypes.String)
         return new RemoteUiTextInputStore(type, nullable == true, value as string);
+    if (type == PredefinedTypes.TextArea)
+        return new RemoteUiTextAreaStore(type, nullable == true, value as string);
     if (type == PredefinedTypes.CheckBox)
         return new RemoteUiCheckboxStore(value == true);
     if(type == PredefinedTypes.FileBase64)
@@ -359,6 +362,41 @@ export class RemoteUiTextInputStore implements IRemoteUiData {
     }
 }
 
+export class RemoteUiTextAreaStore implements IRemoteUiData {
+    private readonly _type: string;
+    private readonly _nullable: boolean;
+    @observable value: string | null;
+    
+    constructor(type: string, nullable: boolean, value: string) {
+        this._type = type;
+        this._nullable = nullable;
+        this.value = value;
+    }
+
+    @action setValue(value?: string) {
+        if (value == null || value.length == 0) {
+            if (this._nullable) {
+                this.value = null;
+            }
+        }
+        this.value = value!;
+    }
+
+    @computed get isValid() {
+        return this._nullable
+            || this._type == PredefinedTypes.TextArea
+            || !isNullOrWhitespace(this.value);
+    }
+
+    getData(): any | Promise<any> {
+        if (this.value == null || this.value.length == 0) {
+            if (this._nullable) {
+                return null;
+            }
+        }
+        return this.value;
+    }
+}
 
 export class RemoteUiSelectStore implements IRemoteUiData {
     @observable possibleValues: RemoteUiPossibleValue[];
