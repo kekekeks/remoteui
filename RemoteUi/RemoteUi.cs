@@ -400,13 +400,11 @@ namespace RemoteUi
                     if (extra.Type.Equals(RemoteUiFieldType.Radio) ||
                         extra.Type.Equals(RemoteUiFieldType.Select) ||
                         extra.Type.Equals(RemoteUiFieldType.Custom))
-                    {
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
                             id = kp.Key,
                             name = kp.Value
                         }));
-                    }
                     if (extra.Type.Equals(RemoteUiFieldType.List))
                         field["listType"] = (extra.ListType is Type listType)
                             ? typeRegistry[listType]
