@@ -21,7 +21,8 @@ enum PredefinedTypes {
     Select = "Select",
     FileBase64 = "FileBase64",
     Custom = "Custom",
-    TextArea = "TextArea"
+    TextArea = "TextArea",
+    DoubleList = "DoubleList"
 }
 
 export interface RemoteUiPossibleValue {
@@ -93,6 +94,8 @@ function getControlForType(config: RemoteUiEditorConfiguration,
             return new RemoteUiSelectStore(type, possibleValues!, nullable == true, value);
         if (type == PredefinedTypes.List)
             return new RemoteUiListStore(config, listType as string, value);
+        if (type == PredefinedTypes.DoubleList)
+            return new RemoteUiDoubleListStore(config, possibleValues!, value);
         if(type == PredefinedTypes.Custom)
         {
             if(config.customization == null)
@@ -244,6 +247,43 @@ export class RemoteUiListItem {
         nextId++;
         this.id = nextId;
         this.item = item;
+    }
+}
+
+export class RemoteUiDoubleListStore implements IRemoteUiData {
+    @observable included: IObservableArray<RemoteUiPossibleValue>;
+    @observable excluded: IObservableArray<RemoteUiPossibleValue>;
+
+    constructor(config: RemoteUiEditorConfiguration, possibleValues: RemoteUiPossibleValue[], data: any) {
+        this.included = observable.array(data ? data : []);
+        this.excluded = observable.array(possibleValues);
+    }
+
+    @action arrangeItem(item: RemoteUiPossibleValue, event: any) {
+        event.preventDefault();
+        if (this.isElementIncluded(item)) {
+            this.included.remove(item);
+            this.excluded.push(item);
+        } else {
+            this.included.push(item);
+            this.excluded.remove(item);
+        }
+    }
+
+    @action reorder(oldIndex: number, newIndex: number) {
+        this.included = observable.array(arrayMove(this.included, oldIndex, newIndex));
+    }
+
+    get isValid(): boolean {
+        return true;
+    }
+
+    private isElementIncluded(item: RemoteUiPossibleValue): boolean {
+        return this.included.indexOf(item) >= 0;
+    }
+
+    async getData(): Promise<any> {
+        return this.included;
     }
 }
 
