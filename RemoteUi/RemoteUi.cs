@@ -356,7 +356,9 @@ namespace RemoteUi
                     field["nullable"] = true;
                 if (listType != null)
                     field["listType"] = listType;
-                if (type.Equals(RemoteUiFieldType.Radio) || type.Equals(RemoteUiFieldType.Select))
+                if (type.Equals(RemoteUiFieldType.Radio) || 
+                    type.Equals(RemoteUiFieldType.Select)  ||
+                    type.Equals(RemoteUiFieldType.Custom))
                 {
                     var lst = new List<object>();
 
@@ -395,12 +397,16 @@ namespace RemoteUi
                         ["name"] = extra.DisplayName,
                         ["type"] = extra.Type.ToString()
                     };
-                    if (extra.Type.Equals(RemoteUiFieldType.Radio) || extra.Type.Equals(RemoteUiFieldType.Select))
+                    if (extra.Type.Equals(RemoteUiFieldType.Radio) ||
+                        extra.Type.Equals(RemoteUiFieldType.Select) ||
+                        extra.Type.Equals(RemoteUiFieldType.Custom))
+                    {
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
                             id = kp.Key,
                             name = kp.Value
                         }));
+                    }
                     if (extra.Type.Equals(RemoteUiFieldType.List))
                         field["listType"] = (extra.ListType is Type listType)
                             ? typeRegistry[listType]
