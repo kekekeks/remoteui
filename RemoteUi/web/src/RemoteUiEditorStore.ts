@@ -283,7 +283,8 @@ export class RemoteUiDoubleListStore implements IRemoteUiData {
     }
 
     async getData(): Promise<any> {
-        return this.included;
+        const mapped = this.included.map(item => item.id);
+        return Promise.all(mapped);
     }
 }
 
