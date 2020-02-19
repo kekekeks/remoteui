@@ -22,7 +22,7 @@ enum PredefinedTypes {
     FileBase64 = "FileBase64",
     Custom = "Custom",
     TextArea = "TextArea",
-    DoubleList = "DoubleList"
+    OrderedMultiSelect = "OrderedMultiSelect"
 }
 
 export interface RemoteUiPossibleValue {
@@ -94,8 +94,8 @@ function getControlForType(config: RemoteUiEditorConfiguration,
             return new RemoteUiSelectStore(type, possibleValues!, nullable == true, value);
         if (type == PredefinedTypes.List)
             return new RemoteUiListStore(config, listType as string, value);
-        if (type == PredefinedTypes.DoubleList)
-            return new RemoteUiDoubleListStore(config, possibleValues!, value);
+        if (type == PredefinedTypes.OrderedMultiSelect)
+            return new RemoteUiOrderedMultiSelectStore(config, possibleValues!, value);
         if(type == PredefinedTypes.Custom)
         {
             if(config.customization == null)
@@ -250,7 +250,7 @@ export class RemoteUiListItem {
     }
 }
 
-export class RemoteUiDoubleListStore implements IRemoteUiData {
+export class RemoteUiOrderedMultiSelectStore implements IRemoteUiData {
     @observable included: IObservableArray<RemoteUiPossibleValue>;
     @observable excluded: IObservableArray<RemoteUiPossibleValue>;
 

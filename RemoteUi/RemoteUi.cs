@@ -22,7 +22,7 @@ namespace RemoteUi
         FileBase64,
         Custom,
         TextArea,
-        DoubleList
+        OrderedMultiSelect
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -110,7 +110,7 @@ namespace RemoteUi
                 case RemoteUiFieldType.Select:
                     return typeof(string);
                 case RemoteUiFieldType.StringList:
-                case RemoteUiFieldType.DoubleList:
+                case RemoteUiFieldType.OrderedMultiSelect:
                     return typeof(List<string>);
                 case RemoteUiFieldType.Integer:
                     return typeof(int);
@@ -358,9 +358,9 @@ namespace RemoteUi
                     field["nullable"] = true;
                 if (listType != null)
                     field["listType"] = listType;
-                if (type.Equals(RemoteUiFieldType.Radio)      || 
-                    type.Equals(RemoteUiFieldType.Select)     ||
-                    type.Equals(RemoteUiFieldType.DoubleList) ||
+                if (type.Equals(RemoteUiFieldType.Radio)              ||
+                    type.Equals(RemoteUiFieldType.Select)             ||
+                    type.Equals(RemoteUiFieldType.OrderedMultiSelect) ||
                     type.Equals(RemoteUiFieldType.Custom))
                 {
                     var lst = new List<object>();
@@ -400,9 +400,9 @@ namespace RemoteUi
                         ["name"] = extra.DisplayName,
                         ["type"] = extra.Type.ToString()
                     };
-                    if (extra.Type.Equals(RemoteUiFieldType.Radio)      ||
-                        extra.Type.Equals(RemoteUiFieldType.Select)     ||
-                        extra.Type.Equals(RemoteUiFieldType.DoubleList) ||
+                    if (extra.Type.Equals(RemoteUiFieldType.Radio)              ||
+                        extra.Type.Equals(RemoteUiFieldType.Select)             ||
+                        extra.Type.Equals(RemoteUiFieldType.OrderedMultiSelect) ||
                         extra.Type.Equals(RemoteUiFieldType.Custom))
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
