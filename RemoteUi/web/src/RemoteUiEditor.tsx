@@ -347,7 +347,7 @@ export const RemoteUiDoubleList = observer((props: { store: RemoteUiDoubleListSt
         <table style={{ width: '100%' }}>
             <tbody>
             <tr>
-                <td style={{ verticalAlign: 'top' }}>
+                <td style={{ verticalAlign: 'top', width: '50%' }}>
                     {store.included.length === 0
                         ? <div className="text-muted text-center" 
                                style={{ marginTop: 10 }}>
@@ -358,7 +358,7 @@ export const RemoteUiDoubleList = observer((props: { store: RemoteUiDoubleListSt
                             useDragHandle={true}
                             onSortEnd={sort => store.reorder(sort.oldIndex, sort.newIndex)} />}
                 </td>
-                <td style={{ verticalAlign: 'top' }}>
+                <td style={{ verticalAlign: 'top', width: '50%' }}>
                     {store.excluded.length === 0
                         ? <div className="text-muted text-center" 
                                style={{ marginTop: 10 }}>
