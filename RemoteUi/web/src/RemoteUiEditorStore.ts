@@ -260,7 +260,7 @@ export class RemoteUiOrderedMultiSelectStore implements IRemoteUiData {
             this.excluded = observable.array(possibleValues);
         } else {
             const keys = <string[]>data;
-            const included = possibleValues.filter(value => keys.indexOf(value.id!) >= 0);
+            const included = keys.map(key => possibleValues.find(value => value.id === key)!);
             const excluded = possibleValues.filter(value => keys.indexOf(value.id!) < 0);
             this.included = observable.array(included);
             this.excluded = observable.array(excluded);
