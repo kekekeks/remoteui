@@ -255,8 +255,16 @@ export class RemoteUiOrderedMultiSelectStore implements IRemoteUiData {
     @observable excluded: IObservableArray<RemoteUiPossibleValue>;
 
     constructor(config: RemoteUiEditorConfiguration, possibleValues: RemoteUiPossibleValue[], data: any) {
-        this.included = observable.array(data ? data : []);
-        this.excluded = observable.array(possibleValues);
+        if (!data) {
+            this.included = observable.array([]);
+            this.excluded = observable.array(possibleValues);
+        } else {
+            const keys = <string[]>data;
+            const included = possibleValues.filter(value => keys.indexOf(value.id!) >= 0);
+            const excluded = possibleValues.filter(value => keys.indexOf(value.id!) < 0);
+            this.included = observable.array(included);
+            this.excluded = observable.array(excluded);
+        }
     }
 
     @action arrangeItem(item: RemoteUiPossibleValue, event: any) {
