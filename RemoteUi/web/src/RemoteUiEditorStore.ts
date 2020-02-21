@@ -291,7 +291,7 @@ export class RemoteUiOrderedMultiSelectStore implements IRemoteUiData {
     }
 
     async getData(): Promise<any> {
-        const mapped = this.included.map(item => item.id);
+        const mapped = this.included.map((item: RemoteUiPossibleValue) => item.id);
         return Promise.all(mapped);
     }
 }
