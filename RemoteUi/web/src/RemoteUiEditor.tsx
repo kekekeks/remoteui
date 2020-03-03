@@ -264,7 +264,9 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
         </div>;
     if (props.item.control instanceof RemoteUiObjectStore)
         return <div>
-            <label className={labelClass}><ExpandLink item={props.item}> {props.item.name}</ExpandLink></label>
+            { props.item.alwaysExpanded 
+                ? <label className={labelClass}>{props.item.name}</label> 
+                : <label className={labelClass}><ExpandLink item={props.item}> {props.item.name}</ExpandLink></label> }
             <Error error={props.item.error}/>
             {props.item.isExpanded
                 ? <>
