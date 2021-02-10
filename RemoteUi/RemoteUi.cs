@@ -21,7 +21,8 @@ namespace RemoteUi
         Number,
         FileBase64,
         Custom,
-        TextArea
+        TextArea,
+        OrderedMultiSelect
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -110,6 +111,7 @@ namespace RemoteUi
                 case RemoteUiFieldType.Select:
                     return typeof(string);
                 case RemoteUiFieldType.StringList:
+                case RemoteUiFieldType.OrderedMultiSelect:
                     return typeof(List<string>);
                 case RemoteUiFieldType.Integer:
                     return typeof(int);
@@ -358,7 +360,10 @@ namespace RemoteUi
                     field["nullable"] = true;
                 if (listType != null)
                     field["listType"] = listType;
-                if (type.Equals(RemoteUiFieldType.Radio) || type.Equals(RemoteUiFieldType.Select))
+                if (type.Equals(RemoteUiFieldType.Radio)              ||
+                    type.Equals(RemoteUiFieldType.Select)             ||
+                    type.Equals(RemoteUiFieldType.OrderedMultiSelect) ||
+                    type.Equals(RemoteUiFieldType.Custom))
                 {
                     var lst = new List<object>();
 
@@ -397,7 +402,10 @@ namespace RemoteUi
                         ["name"] = extra.DisplayName,
                         ["type"] = extra.Type.ToString()
                     };
-                    if (extra.Type.Equals(RemoteUiFieldType.Radio) || extra.Type.Equals(RemoteUiFieldType.Select))
+                    if (extra.Type.Equals(RemoteUiFieldType.Radio)              ||
+                        extra.Type.Equals(RemoteUiFieldType.Select)             ||
+                        extra.Type.Equals(RemoteUiFieldType.OrderedMultiSelect) ||
+                        extra.Type.Equals(RemoteUiFieldType.Custom))
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
                             id = kp.Key,

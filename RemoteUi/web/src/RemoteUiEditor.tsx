@@ -1,6 +1,7 @@
 import {
     IRemoteUiData,
     RemoteUiCheckboxStore,
+    RemoteUiOrderedMultiSelectStore,
     RemoteUiEditorStore,
     RemoteUiFieldStore, RemoteUiFileBase64Store,
     RemoteUiGroupStore,
@@ -283,6 +284,97 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
     </div>;
 }));
 
+const RemoteUiOrderedMultiSelectSortableItem = observer(SortableElement(observer((props: {
+    item: RemoteUiPossibleValue, store: RemoteUiOrderedMultiSelectStore
+}) : any => {
+    const store = props.store;
+    const item = props.item;
+    return <table className="remote-ui-list-item">
+        <tbody>
+        <tr>
+            <Handle />
+            <td>
+                <input className="form-control"
+                       style={{ marginTop: 0 }}
+                       readOnly={true}
+                       value={item.name}/>
+            </td>
+            <td className="remote-ui-list-item-remove">
+                <a href="#"
+                   className="btn btn-warning"
+                   onClick={e => store.arrangeItem(item, e)}>
+                    {'-'}
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+})));
+
+const RemoteUiOrderedMultiSelectIncludes = observer(SortableContainer(observer((props: {
+    store: RemoteUiOrderedMultiSelectStore
+}) => {
+    const store = props.store;
+    return <div>{props.store.included.map((item, index) => {
+        return <RemoteUiOrderedMultiSelectSortableItem item={item} index={index} key={item.id!} store={store} />
+    })}</div>
+})));
+
+const RemoteUiOrderedMultiSelectExcludes = observer((props: { store: RemoteUiOrderedMultiSelectStore }) => {
+    const store = props.store;
+    return <div>{props.store.excluded.map(item => {
+        return <table className="remote-ui-list-item" key={item.id!}>
+            <tbody>
+            <tr>
+                <td>
+                    <input className="form-control"
+                           style={{ marginTop: 0 }}
+                           readOnly={true}
+                           value={item.name}/>
+                </td>
+                <td className="remote-ui-list-item-remove">
+                    <a href="#"
+                       className="btn btn-success"
+                       onClick={e => store.arrangeItem(item, e)}>
+                        {'+'}
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    })}</div>
+});
+
+export const RemoteUiOrderedMultiSelect = observer((props: { store: RemoteUiOrderedMultiSelectStore }) => {
+    const store = props.store;
+    return <div className="remote-ui-object" style={{ marginTop: 5 }}>
+        <table style={{ width: '100%' }}>
+            <tbody>
+            <tr>
+                <td style={{ verticalAlign: 'top', width: '50%' }}>
+                    {store.included.length === 0
+                        ? <div className="text-muted text-center" 
+                               style={{ marginTop: 10 }}>
+                            Nothing selected.
+                          </div>
+                        : <RemoteUiOrderedMultiSelectIncludes
+                            store={store}
+                            useDragHandle={true}
+                            onSortEnd={sort => store.reorder(sort.oldIndex, sort.newIndex)} />}
+                </td>
+                <td style={{ verticalAlign: 'top', width: '50%' }}>
+                    {store.excluded.length === 0
+                        ? <div className="text-muted text-center" 
+                               style={{ marginTop: 10 }}>
+                            All elements were selected.
+                          </div>
+                        : <RemoteUiOrderedMultiSelectExcludes store={store} />}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>;
+});
 
 export const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(function (props: {
     store: any, remoteUiEditorContext?: RemoteUiEditorContext }) {
@@ -305,6 +397,8 @@ export const RemoteUiItemEditor = inject("remoteUiEditorContext")(observer(funct
     }
     else if (props.store instanceof RemoteUiListStore)
         return <RemoteUiList store={props.store}/>;
+    else if (props.store instanceof RemoteUiOrderedMultiSelectStore)
+        return <RemoteUiOrderedMultiSelect store={props.store}/>;
     else if(props.store instanceof RemoteUiFileBase64Store)
         return <RemoteUiFileBase64 store={props.store}/>;
     else if (props.store instanceof RemoteUiNullableStore)

@@ -21,7 +21,8 @@ enum PredefinedTypes {
     Select = "Select",
     FileBase64 = "FileBase64",
     Custom = "Custom",
-    TextArea = "TextArea"
+    TextArea = "TextArea",
+    OrderedMultiSelect = "OrderedMultiSelect"
 }
 
 export interface RemoteUiPossibleValue {
@@ -94,6 +95,8 @@ function getControlForType(config: RemoteUiEditorConfiguration,
             return new RemoteUiSelectStore(type, possibleValues!, nullable == true, value);
         if (type == PredefinedTypes.List)
             return new RemoteUiListStore(config, listType as string, value);
+        if (type == PredefinedTypes.OrderedMultiSelect)
+            return new RemoteUiOrderedMultiSelectStore(config, possibleValues!, value);
         if(type == PredefinedTypes.Custom)
         {
             if(config.customization == null)
@@ -245,6 +248,52 @@ export class RemoteUiListItem {
         nextId++;
         this.id = nextId;
         this.item = item;
+    }
+}
+
+export class RemoteUiOrderedMultiSelectStore implements IRemoteUiData {
+    @observable included: IObservableArray<RemoteUiPossibleValue>;
+    @observable excluded: IObservableArray<RemoteUiPossibleValue>;
+
+    constructor(config: RemoteUiEditorConfiguration, possibleValues: RemoteUiPossibleValue[], data: any) {
+        if (!data) {
+            this.included = observable.array([]);
+            this.excluded = observable.array(possibleValues);
+        } else {
+            const keys = <string[]>data;
+            const included = keys.map(key => possibleValues.find(value => value.id === key)!);
+            const excluded = possibleValues.filter(value => keys.indexOf(value.id!) < 0);
+            this.included = observable.array(included);
+            this.excluded = observable.array(excluded);
+        }
+    }
+
+    @action arrangeItem(item: RemoteUiPossibleValue, event: any) {
+        event.preventDefault();
+        if (this.isElementIncluded(item)) {
+            this.included.remove(item);
+            this.excluded.push(item);
+        } else {
+            this.included.push(item);
+            this.excluded.remove(item);
+        }
+    }
+
+    @action reorder(oldIndex: number, newIndex: number) {
+        this.included = observable.array(arrayMove(this.included, oldIndex, newIndex));
+    }
+
+    get isValid(): boolean {
+        return true;
+    }
+
+    private isElementIncluded(item: RemoteUiPossibleValue): boolean {
+        return this.included.indexOf(item) >= 0;
+    }
+
+    async getData(): Promise<any> {
+        const mapped = this.included.map((item: RemoteUiPossibleValue) => item.id);
+        return Promise.all(mapped);
     }
 }
 
