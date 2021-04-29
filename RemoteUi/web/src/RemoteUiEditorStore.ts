@@ -33,14 +33,14 @@ export interface RemoteUiPossibleValue {
 export interface RemoteUiFieldDefinition {
     id: string;
     name: string;
-    description: string;
-    placeholder: string;
-    type: string;
+    description?: string;
+    placeholder?: string;
+    type: string | PredefinedTypes;
     listType?: string;
     possibleValues?: RemoteUiPossibleValue[],
     nullable?: boolean,
-    customType: string,
-    alwaysExpanded: boolean
+    customType?: string,
+    alwaysExpanded?: boolean
 }
 
 export interface RemoteUiFieldGroupDefinition {
@@ -312,9 +312,9 @@ export class RemoteUiFieldStore implements IRemoteUiData {
     constructor(definition: RemoteUiFieldDefinition, control: IRemoteUiData) {
         this.id = definition.id;
         this.name = definition.name;
-        this.description = definition.description;
+        this.description = definition.description || "";
         this.control = control;
-        this.isExpanded = this.alwaysExpanded = definition.alwaysExpanded;
+        this.isExpanded = this.alwaysExpanded = definition.alwaysExpanded || false;
     }
 
     public setErrors(data: any) 

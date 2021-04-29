@@ -1,21 +1,27 @@
-.remote-ui-group-items
+.remoteUiGroupItems
 {
     margin-left: 5px;
 }
 
-.remote-ui-object
+.remoteUiObject
 {
     padding: 10px;
     border: 1px dashed #909090;
 }
 
-.remote-ui-list-item
+.remoteUiListItem
 {
     margin: 3px;
     width: 100%;
+    transform-style: preserve-3d;
 }
 
-.remote-ui-list-item-remove
+.remoteUiListItemHelper
+{
+    z-index: 10000;
+}
+
+.remoteUiListItemRemove
 {
     width: 1%;
     white-space: nowrap;
@@ -23,7 +29,7 @@
     vertical-align: top;
 }
 
-.remote-ui-list-item-handle
+.remoteUiListItemHandle
 {
     height: 100%;
     width: 30px;
@@ -36,7 +42,7 @@
     );
 }
 
-.remote-ui-description
+.remoteUiDescription
 {
     color: #909090;
     font-weight: bold;
@@ -44,19 +50,19 @@
     white-space: pre;
 }
 
-.remote-ui-editor label
+.remoteUiEditor label
 {
     margin-bottom: 0px;
     margin-top: 3px;
     font-weight: bold;
 }
 
-.remote-ui-editor input
+.remoteUiEditor input
 {
     margin-top: 3px;
 }
 
-.remote-ui-nullable-add-container
+.remoteUiNullableAddContainer
 {
     cursor: pointer;
     padding: 3px;
@@ -66,12 +72,12 @@
     background-color: #bfbfbf;
 }
 
-label.remote-ui-error
+label.remoteUiError
 {
     color: #b00000;
 }
 
-.remote-ui-error-string
+.remoteUiErrorString
 {
     color: #a03030;
 }
