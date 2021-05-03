@@ -15,6 +15,7 @@ import {
 import * as React from "react";
 import {inject, observer, Provider} from "mobx-react";
 import {SortableContainer, SortableElement, SortableHandle} from "react-sortable-hoc";
+// @ts-ignore
 import styles from "./RemoteUiEditor.module.css";
 import {observable} from "mobx";
 
