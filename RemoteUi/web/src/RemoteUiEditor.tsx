@@ -422,7 +422,7 @@ interface CustomSelect {
 class RemoteUiEditorContext
 {
     @observable.ref remoteUiEditorCustomSelect?: CustomSelect;
-    @observable highlightErrors: boolean;
+    @observable highlightErrors: boolean = false;
     @observable.ref customization?: IRemoteUiEditorCustomization;
 }
 
