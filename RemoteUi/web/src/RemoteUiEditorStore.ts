@@ -33,14 +33,14 @@ export interface RemoteUiPossibleValue {
 export interface RemoteUiFieldDefinition {
     id: string;
     name: string;
-    description: string;
-    placeholder: string;
+    description?: string;
+    placeholder?: string;
     type: string;
     listType?: string;
     possibleValues?: RemoteUiPossibleValue[],
     nullable?: boolean,
-    customType: string,
-    alwaysExpanded: boolean
+    customType?: string,
+    alwaysExpanded?: boolean
 }
 
 export interface RemoteUiFieldGroupDefinition {
@@ -155,7 +155,7 @@ export class RemoteUiObjectStore implements IRemoteUiData {
     }
     
     async getData(): Promise<any> {
-        const rv = {};
+        const rv : any = {};
         for (const g of this.groups)
             for (const f of g.fields) {
                 rv[f.id] = await f.getData();
@@ -312,9 +312,9 @@ export class RemoteUiFieldStore implements IRemoteUiData {
     constructor(definition: RemoteUiFieldDefinition, control: IRemoteUiData) {
         this.id = definition.id;
         this.name = definition.name;
-        this.description = definition.description;
+        this.description = definition.description || "";
         this.control = control;
-        this.isExpanded = this.alwaysExpanded = definition.alwaysExpanded;
+        this.isExpanded = this.alwaysExpanded = definition.alwaysExpanded == true;
     }
 
     public setErrors(data: any) 
@@ -487,7 +487,7 @@ export class RemoteUiFileBase64Store implements IRemoteUiData {
     @observable useOldFile : boolean;
     @observable nullable : boolean;
     
-    @observable.ref file: File | null;
+    @observable.ref file: File | null = null;
     @observable isValid = true;
     getData() : Promise<any> | any
     {

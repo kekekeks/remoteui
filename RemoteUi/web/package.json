@@ -1,23 +1,13 @@
 {
+  "private": true,
   "name": "@kekekeks/remoteui",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dist": "tsc --p ./tsconfig.json"
-  },
-  "author": "Nikita Tsukanov",
+  "version": "1.0.0",
   "license": "MIT",
-  "devDependencies": {
-    "typescript": "^3.1.5",
-    "@types/react": "^16.3.14",
-    "@types/react-dom": "^16.0.5"
-  },
-  "dependencies": {
-    "mobx": "^4.3.1",
-    "mobx-react": "^5.2.3",
-    "react": "^16.4.1",
-    "react-dom": "^16.3.2",
-    "react-sortable-hoc": "^0.8.3"
+  "main": "src/index.tsx",
+  "peerDependencies": {
+    "mobx": "*",
+    "mobx-react": "*",
+    "react": "*",
+    "react-sortable-hoc": "*3"
   }
 }

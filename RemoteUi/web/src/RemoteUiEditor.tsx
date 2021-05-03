@@ -146,6 +146,7 @@ const Handle = SortableHandle(() => <td className="remote-ui-list-item-handle"/>
 const RemoteUiList = observer(function (props: { store: RemoteUiListStore }) {
     return <div>
         <SortableList store={props.store}
+                      helperClass="remote-ui-list-item-helper"
                       onSortEnd={sort => {
                           props.store.reorder(sort.oldIndex, sort.newIndex);
                       }}
