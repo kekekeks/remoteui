@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using RemoteUi;
 
 namespace Playground.Controllers
@@ -16,7 +17,7 @@ namespace Playground.Controllers
         private RemoteUiBuilder _info;
         public HomeController()
         {
-            _info = new RemoteUiBuilder(typeof(Dto), null).Register(typeof(DtoBase), null, "Test");
+            _info = new RemoteUiBuilder(typeof(Dto), null, null, new SnakeCaseNamingStrategy()).Register(typeof(DtoBase), null, "Test");
         }
         [HttpGet("")]
         public IActionResult Index()
@@ -28,7 +29,7 @@ namespace Playground.Controllers
         public object GetDescription() => _info.Build(null);
 
         [HttpGet("initial")]
-        public object GetObject() => new JsonResult(new Dto(), _info.GetSerializerSettings());
+        public object GetObject() => new JsonResult(new Dto() { SomeString = "Sample Text" }, _info.GetSerializerSettings());
 
         [HttpPost("validate")]
         public object Validate([FromBody] Dto data)

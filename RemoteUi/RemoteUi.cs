@@ -255,7 +255,7 @@ namespace RemoteUi
             Converters = {new StringEnumConverter()}
         };
 
-        static JObject Get(
+        private JObject Get(
             IServiceProvider services, Type typee, 
             Dictionary<Type, string> typeRegistry,
             IEnumerable<IExtraRemoteUiField> extraFields,
@@ -264,7 +264,7 @@ namespace RemoteUi
             var groups = typee.GetCustomAttributes<RemoteUiFieldGroup>()
                 .Select(x => new FieldGroup
                 {
-                    Id = x.Id,
+                    Id = _namingStrategy.GetPropertyName(x.Id, false),
                     Name = x.Name
                 }).ToList();
 
@@ -350,7 +350,7 @@ namespace RemoteUi
                 var field = new JObject
                 {
                     ["name"] = name,
-                    ["id"] = prop.Name,
+                    ["id"] = _namingStrategy.GetPropertyName(prop.Name, false),
                     ["type"] = type.ToString(),
                     ["description"] = description,
                     ["alwaysExpanded"] = attr?.AlwaysExpanded == true
@@ -372,7 +372,7 @@ namespace RemoteUi
                     {
                         lst.Add(new
                         {
-                            id = radioAttr.Id,
+                            id = _namingStrategy.GetPropertyName(radioAttr.Id, false),
                             name = radioAttr.Name
                         });
                     }
@@ -382,7 +382,7 @@ namespace RemoteUi
                         foreach (var kp in customAttr.Get(services))
                             lst.Add(new
                             {
-                                id = kp.Key,
+                                id = _namingStrategy.GetPropertyName(kp.Key, false),
                                 name = kp.Value
                             });
                     }
@@ -399,7 +399,7 @@ namespace RemoteUi
                     var grp = dic[extra.Group ?? ""];
                     var field = new JObject
                     {
-                        ["id"] = extra.Id,
+                        ["id"] = _namingStrategy.GetPropertyName(extra.Id, false),
                         ["name"] = extra.DisplayName,
                         ["type"] = extra.Type.ToString()
                     };
@@ -409,7 +409,7 @@ namespace RemoteUi
                         extra.Type.Equals(RemoteUiFieldType.Custom))
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
-                            id = kp.Key,
+                            id = _namingStrategy.GetPropertyName(kp.Key, false),
                             name = kp.Value
                         }));
                     if (extra.Type.Equals(RemoteUiFieldType.List))
