@@ -196,6 +196,7 @@ namespace RemoteUi
         private readonly IEnumerable<IExtraRemoteUiField> _rootExtraFields;
         private readonly Func<string, string> _displayTransform;
         private readonly Type _root;
+        private readonly NamingStrategy _namingStrategy;
 
         class FieldGroup
         {
@@ -210,12 +211,12 @@ namespace RemoteUi
             new List<(Type type, IEnumerable<IExtraRemoteUiField> fields)>();
 
         public RemoteUiBuilder(Type root, 
-            IEnumerable<IExtraRemoteUiField> extraFields, 
-            Func<string, string> displayTransform = null)
+            IEnumerable<IExtraRemoteUiField> extraFields, Func<string, string> displayTransform = null, NamingStrategy namingStrategy = null)
         {
             _root = root;
             _rootExtraFields = extraFields;
             _displayTransform = displayTransform;
+            _namingStrategy = namingStrategy ?? new DefaultNamingStrategy();
         }
 
         public RemoteUiBuilder Register(Type type, IEnumerable<IExtraRemoteUiField> fields, string name = null)
@@ -245,7 +246,7 @@ namespace RemoteUi
                 .Where(x => x.fields != null)
                 .ToDictionary(t => t.type, t => t.fields?.ToList() ?? new List<IExtraRemoteUiField>());
             dic[_root] = _rootExtraFields?.ToList() ?? new List<IExtraRemoteUiField>();
-            return new ContractResolver(dic);
+            return new ContractResolver(dic) {NamingStrategy = _namingStrategy};
         }
         
         public JsonSerializerSettings GetSerializerSettings() => new JsonSerializerSettings()
