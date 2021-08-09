@@ -26,10 +26,10 @@ public class ContactsResponse
 
 // Create a new RemoteUi builder.
 var noFields = new IExtraRemoteUiField[0];
-var builder = new RemoteUiBuilder(typeof(Contacts), noFields)
+var builder = new RemoteUiBuilder<Contacts>(noFields)
     // Register all of the custom models 
     // used in your own model tree.
-    .Register(typeof(Contacts), noFields);
+    .Register<Contacts>(noFields);
     
 // Return the response from your controller.
 var response = new AppSettingsResponse

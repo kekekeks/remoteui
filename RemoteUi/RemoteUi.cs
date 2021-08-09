@@ -191,6 +191,20 @@ namespace RemoteUi
         }
     }
 
+    public class RemoteUiBuilder<T> : RemoteUiBuilder
+    {
+        public RemoteUiBuilder(IEnumerable<IExtraRemoteUiField> extraFields, Func<string, string> displayTransform = null, NamingStrategy namingStrategy = null) 
+            : base(typeof(T), extraFields, displayTransform, namingStrategy)
+        {
+        }
+
+        public RemoteUiBuilder<T> Register<TType>(IEnumerable<IExtraRemoteUiField> fields, string name = null) =>
+            Register(typeof(TType), fields, name);
+        
+        public new RemoteUiBuilder<T> Register(Type type, IEnumerable<IExtraRemoteUiField> fields, string name = null) =>
+            base.Register(type, fields, name) as RemoteUiBuilder<T>;
+    }
+    
     public class RemoteUiBuilder
     {
         private readonly IEnumerable<IExtraRemoteUiField> _rootExtraFields;
