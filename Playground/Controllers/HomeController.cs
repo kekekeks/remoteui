@@ -62,6 +62,10 @@ namespace Playground.Controllers
         [RemoteUiField("List of strings")]
         public List<string> ListOfStrings { get; set; }
         
+        [RemoteUiField("Overided ID List", Id = "OverrideMe")]
+        [JsonProperty("OverrideMe")]
+        public List<string> OverrideList { get; set; } = new List<string>() { "123321" };
+        
         [RemoteUiField("SomeString")]
         public string SomeString { get; set; }
         

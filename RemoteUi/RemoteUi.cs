@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -28,6 +28,7 @@ namespace RemoteUi
     [AttributeUsage(AttributeTargets.Property)]
     public class RemoteUiField : Attribute
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Group { get; set; }
         public object Type { get; set; }
@@ -356,7 +357,9 @@ namespace RemoteUi
                     ["alwaysExpanded"] = attr?.AlwaysExpanded == true
                 };
                 if (attr?.CustomType != null)
-                    field["customType"] = attr.CustomType; 
+                    field["customType"] = attr.CustomType;
+                if (attr?.Id != null)
+                    field["id"] = attr.Id;
                 if (nullable)
                     field["nullable"] = true;
                 if (listType != null)
