@@ -279,7 +279,7 @@ namespace RemoteUi
             var groups = typee.GetCustomAttributes<RemoteUiFieldGroup>()
                 .Select(x => new FieldGroup
                 {
-                    Id = _namingStrategy.GetPropertyName(x.Id, false),
+                    Id = x.Id,
                     Name = x.Name
                 }).ToList();
 
@@ -389,7 +389,7 @@ namespace RemoteUi
                     {
                         lst.Add(new
                         {
-                            id = _namingStrategy.GetPropertyName(radioAttr.Id, false),
+                            id = radioAttr.Id,
                             name = radioAttr.Name
                         });
                     }
@@ -399,7 +399,7 @@ namespace RemoteUi
                         foreach (var kp in customAttr.Get(services))
                             lst.Add(new
                             {
-                                id = _namingStrategy.GetPropertyName(kp.Key, false),
+                                id = kp.Key,
                                 name = kp.Value
                             });
                     }
@@ -416,7 +416,7 @@ namespace RemoteUi
                     var grp = dic[extra.Group ?? ""];
                     var field = new JObject
                     {
-                        ["id"] = _namingStrategy.GetPropertyName(extra.Id, false),
+                        ["id"] = extra.Id,
                         ["name"] = extra.DisplayName,
                         ["type"] = extra.Type.ToString()
                     };
@@ -426,7 +426,7 @@ namespace RemoteUi
                         extra.Type.Equals(RemoteUiFieldType.Custom))
                         field["possibleValues"] = JToken.FromObject(extra.PossibleValues.Select(kp => new
                         {
-                            id = _namingStrategy.GetPropertyName(kp.Key, false),
+                            id = kp.Key,
                             name = kp.Value
                         }));
                     if (extra.Type.Equals(RemoteUiFieldType.List))
