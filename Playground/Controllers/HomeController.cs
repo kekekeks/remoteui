@@ -14,10 +14,16 @@ namespace Playground.Controllers
     [Route("")]
     public class HomeController : Controller
     {
-        private RemoteUiBuilder _info;
+        private RemoteUiBuilder<Dto> _info;
+        private RemoteUiBuilder _oldInfo;
         public HomeController()
         {
-            _info = new RemoteUiBuilder(typeof(Dto), null, null, new SnakeCaseNamingStrategy()).Register(typeof(DtoBase), null, "Test");
+            // Old example
+            _oldInfo = new RemoteUiBuilder(typeof(Dto), null, null, new SnakeCaseNamingStrategy())
+                .Register(typeof(DtoBase), null, "Test");
+            
+            _info = new RemoteUiBuilder<Dto>(null, null, new SnakeCaseNamingStrategy())
+                .Register<DtoBase>(null, "Test");
         }
         [HttpGet("")]
         public IActionResult Index()
