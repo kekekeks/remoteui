@@ -487,7 +487,7 @@ export class RemoteUiFileBase64Store implements IRemoteUiData {
     @observable useOldFile : boolean;
     @observable nullable : boolean;
     
-    @observable.ref file: File | null;
+    @observable.ref file: File | null = null;
     @observable isValid = true;
     getData() : Promise<any> | any
     {
