@@ -39,7 +39,7 @@ var builder = new RemoteUiBuilder<Contacts>(noFields)
 // Return the response from your controller or RPC.
 return Ok(new ContactsResponse
 {
-    Definition = builder.Build(null),
+    Definition = builder.Build((IServiceProvider)null),
     Value = new Contacts
     {
         Phone = "12345",
@@ -128,6 +128,8 @@ public class SampleRemoteUiDto
 
     public class SelectOptionProvider : RemoteUiCustomRadioValuesAttribute
     {
+        // The IServiceProvider parameter denotes an instance of the service provider you pass
+        // into the RemoteUiBuilder<T>.Build method when configuring RemoteUi.
         public override IEnumerable<KeyValuePair<string, string>> Get(IServiceProvider services)
         {
             return new Dictionary<string, string>
