@@ -91,6 +91,8 @@ const contacts = await store.getDataAsync();
 
 ## Features
 
+### RemoteUi Field Types
+
 RemoteUi allows configuring properties of fields in an editor, such as title, description, nullability, group or field type. Supported field types are: `String`, `Integer`, `CheckBox`, `Radio`, `Select`, `StringList`, `List`, `Number`, `FileBase64`, `Custom`, `TextArea`, `OrderedMultiSelect`. RemoteUi is able to infer most types based on C# primitive types from standard library, so in most cases you don't have to specify the type explicitly.
 
 ```cs
@@ -180,3 +182,20 @@ The example above results into the following UI:
 
 ![image](https://user-images.githubusercontent.com/6759207/74869540-33907c80-5369-11ea-87e9-ea546f0c9f43.png)
 
+### RemoteUi Builder Configuration
+
+In case if you'd like to support multiple languages in your application, you can pass dictionary keys to `Title` and `Description` attribute properties when defining a `RemoteUiField`. Then, pass a `displayTransform` parameter of type `Func<string, string>` to the `RemoteUiBuilder` constructor:
+
+```cs
+var builder = new RemoteUiBuilder<Contacts>(
+        displayTransform: key => language[key])
+    .Register<Contacts>();
+```
+
+If you are using a custom naming strategy in your C# APIs, you can override the naming strategy used during RemoteUi definition generation. Just pass a `namingStrategy` parameter to the `RemoteUiBuilder` constructor:
+
+```cs
+var builder = new RemoteUiBuilder<Contacts>(
+        namingStrategy: new CamelCaseNamingStrategy())
+    .Register<Contacts>();
+```
