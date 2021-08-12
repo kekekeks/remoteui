@@ -32,9 +32,9 @@ public class ContactsResponse
 
 // Create a new RemoteUi builder. Register all of your custom nested
 // models here, that are used in your model tree.
-var noFields = new IExtraRemoteUiField[0];
-var builder = new RemoteUiBuilder<Contacts>(noFields)
-    .Register<Contacts>(noFields);
+var builder = new RemoteUiBuilder<Contacts>()
+    // .Register<ContactsInnerModel>() etc.
+    .Register<Contacts>();
     
 // Return the response from your controller or RPC.
 return Ok(new ContactsResponse
@@ -91,24 +91,33 @@ const contacts = await store.getDataAsync();
 
 ## Features
 
-RemoteUi allows configuring properties of fields in an editor, such as title, description, nullability, group or field type. Supported field types are: `String`, `Integer`, `CheckBox`, `Radio`, `Select`, `StringList`, `List`, `Number`, `FileBase64`, `Custom`, `TextArea`, `OrderedMultiSelect`. 
+RemoteUi allows configuring properties of fields in an editor, such as title, description, nullability, group or field type. Supported field types are: `String`, `Integer`, `CheckBox`, `Radio`, `Select`, `StringList`, `List`, `Number`, `FileBase64`, `Custom`, `TextArea`, `OrderedMultiSelect`. RemoteUi is able to infer most types based on C# primitive types from standard library, so in most cases you don't have to specify the type explicitly.
 
 ```cs
-public class SampleTextFieldDto
+public class SampleRemoteUiDto
 {
     [RemoteUiField(
         "Property title",
         Type = RemoteUiFieldType.String,
         Description = "Property description, can contain long messages.",
         Nullable = false)]
-    public string Name { get; set; } = string.Empty;
+    public string TextField { get; set; } = string.Empty;
+
+    [RemoteUiField("CheckBox")] // RemoteUiFieldType.CheckBox
+    public bool BooleanField { get; set; }
+
+    [RemoteUiField("Integer")] // RemoteUiFieldType.Integer
+    public int IntegerField { get; set; }
+
+    [RemoteUiField("Number")] // RemoteUiFieldType.Number
+    public double DoubleField { get; set; }
 }
 ```
 
 For a `Select` field, you can provide possible options via `RemoteUiRadioValue` attributes:
 
 ```cs
-public class SampleRadioFieldDto
+public class SampleRemoteUiDto
 {
     [RemoteUiRadioValue("id-1", "First possible value")]
     [RemoteUiRadioValue("id-2", "Second possible value")]
@@ -123,7 +132,7 @@ Additionally, RemoteUi allows loading possible `Select` options dynamically:
 public class SampleRemoteUiDto
 {
     [SelectOptionProvider]
-    [RemoteUiField("Property type", Type = RemoteUiFieldType.Select)]
+    [RemoteUiField("One option from a given set", Type = RemoteUiFieldType.Select)]
     public string Option { get; set; } = "anon";
 
     public class SelectOptionProvider : RemoteUiCustomRadioValuesAttribute
@@ -141,4 +150,33 @@ public class SampleRemoteUiDto
     }
 }
 ```
+
+There is also a useful `OrderedMultiSelect` field type that allows selecting multiple values obtained from a provider that inherits from `RemoteUiCustomRadioValues`. The values selected via `OrderedMultiSelect` are kept in a deterministic order defined by a user. See an example:
+
+```cs
+public class SampleRemoteUiDto
+{
+    [SelectOptionProvider]
+    [RemoteUiField("Multiple options from a given set", Type = RemoteUiFieldType.OrderedMultiSelect)]
+    public List<string> Options { get; set; } = new List<string>();
+
+    public class SelectOptionProvider : RemoteUiCustomRadioValuesAttribute
+    {
+        // The IServiceProvider parameter denotes an instance of the service provider you pass
+        // into the RemoteUiBuilder<T>.Build method when configuring RemoteUi.
+        public override IEnumerable<KeyValuePair<string, string>> Get(IServiceProvider services)
+        {
+            return new Dictionary<string, string>
+            {
+                {"id-1", "First possble value"},
+                {"id-2", "Second possble value"},
+            };
+        }
+    }
+}
+```
+
+The example above results into the following UI:
+
+![image](https://user-images.githubusercontent.com/6759207/74869540-33907c80-5369-11ea-87e9-ea546f0c9f43.png)
 
