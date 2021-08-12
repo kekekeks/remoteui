@@ -155,7 +155,7 @@ export class RemoteUiObjectStore implements IRemoteUiData {
     }
     
     async getData(): Promise<any> {
-        const rv = {};
+        const rv: {[key: string]: string} = {};
         for (const g of this.groups)
             for (const f of g.fields) {
                 rv[f.id] = await f.getData();
