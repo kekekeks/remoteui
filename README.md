@@ -91,3 +91,52 @@ const contacts = await store.getDataAsync();
 
 ## Features
 
+RemoteUi allows configuring properties of fields in an editor, such as title, description, nullability, group or field type. Supported field types are: `String`, `Integer`, `CheckBox`, `Radio`, `Select`, `StringList`, `List`, `Number`, `FileBase64`, `Custom`, `TextArea`, `OrderedMultiSelect`. 
+
+```cs
+public class SampleTextFieldDto
+{
+    [RemoteUiField(
+        "Property title",
+        Type = RemoteUiFieldType.String,
+        Description = "Property description, can contain long messages.",
+        Nullable = false)]
+    public string Name { get; set; } = string.Empty;
+}
+```
+
+For a `Select` field, you can provide possible options via `RemoteUiRadioValue` attributes:
+
+```cs
+public class SampleRadioFieldDto
+{
+    [RemoteUiRadioValue("id-1", "First possible value")]
+    [RemoteUiRadioValue("id-2", "Second possible value")]
+    [RemoteUiField("Property title", Type = RemoteUiFieldType.Select)]
+    public string Option { get; set; } = "id-1";
+}
+```
+
+Additionally, RemoteUi allows loading possible `Select` options dynamically:
+
+```cs
+public class SampleRemoteUiDto
+{
+    [SelectOptionProvider]
+    [RemoteUiField("Property type", Type = RemoteUiFieldType.Select)]
+    public string Option { get; set; } = "anon";
+
+    public class SelectOptionProvider : RemoteUiCustomRadioValuesAttribute
+    {
+        public override IEnumerable<KeyValuePair<string, string>> Get(IServiceProvider services)
+        {
+            return new Dictionary<string, string>
+            {
+                {"id-1", "First possble value"},
+                {"id-2", "Second possble value"},
+            };
+        }
+    }
+}
+```
+
