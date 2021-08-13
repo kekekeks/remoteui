@@ -194,15 +194,18 @@ namespace RemoteUi
 
     public class RemoteUiBuilder<T> : RemoteUiBuilder
     {
-        public RemoteUiBuilder(IEnumerable<IExtraRemoteUiField> extraFields, Func<string, string> displayTransform = null, NamingStrategy namingStrategy = null) 
+        public RemoteUiBuilder(
+            IEnumerable<IExtraRemoteUiField> extraFields = null,
+            Func<string, string> displayTransform = null,
+            NamingStrategy namingStrategy = null) 
             : base(typeof(T), extraFields, displayTransform, namingStrategy)
         {
         }
 
-        public RemoteUiBuilder<T> Register<TType>(IEnumerable<IExtraRemoteUiField> fields, string name = null) =>
+        public RemoteUiBuilder<T> Register<TType>(IEnumerable<IExtraRemoteUiField> fields = null, string name = null) =>
             Register(typeof(TType), fields, name);
         
-        public new RemoteUiBuilder<T> Register(Type type, IEnumerable<IExtraRemoteUiField> fields, string name = null) =>
+        public new RemoteUiBuilder<T> Register(Type type, IEnumerable<IExtraRemoteUiField> fields = null, string name = null) =>
             base.Register(type, fields, name) as RemoteUiBuilder<T>;
     }
     
@@ -226,18 +229,22 @@ namespace RemoteUi
             new List<(Type type, IEnumerable<IExtraRemoteUiField> fields)>();
 
         public RemoteUiBuilder(Type root, 
-            IEnumerable<IExtraRemoteUiField> extraFields, Func<string, string> displayTransform = null, NamingStrategy namingStrategy = null)
+            IEnumerable<IExtraRemoteUiField> extraFields = null,
+            Func<string, string> displayTransform = null,
+            NamingStrategy namingStrategy = null)
         {
             _root = root;
-            _rootExtraFields = extraFields;
+            _rootExtraFields = extraFields ?? Enumerable.Empty<IExtraRemoteUiField>();
             _displayTransform = displayTransform;
             _namingStrategy = namingStrategy ?? new DefaultNamingStrategy();
         }
 
-        public RemoteUiBuilder Register(Type type, IEnumerable<IExtraRemoteUiField> fields, string name = null)
+        public RemoteUiBuilder Register(Type type,
+            IEnumerable<IExtraRemoteUiField> fields = null,
+            string name = null)
         {
             _registeredTypes.Add(type, name ?? type.Name);
-            _types.Add((type, fields));
+            _types.Add((type, fields ?? Enumerable.Empty<IExtraRemoteUiField>()));
             return this;
         }
 
