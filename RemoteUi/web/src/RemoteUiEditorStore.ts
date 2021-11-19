@@ -94,7 +94,7 @@ function getControlForType(config: RemoteUiEditorConfiguration,
         if (type == PredefinedTypes.Radio || type == PredefinedTypes.Select)
             return new RemoteUiSelectStore(type, possibleValues!, nullable == true, value);
         if (type == PredefinedTypes.List)
-            return new RemoteUiListStore(config, listType as string, value);
+            return new RemoteUiListStore(config, listType as string, possibleValues, value);
         if (type == PredefinedTypes.OrderedMultiSelect)
             return new RemoteUiOrderedMultiSelectStore(config, possibleValues!, value);
         if(type == PredefinedTypes.Custom)
@@ -177,7 +177,7 @@ export class RemoteUiListStore implements IRemoteUiData {
     private listType: string;
     private config: RemoteUiEditorConfiguration;
 
-    constructor(config: RemoteUiEditorConfiguration, listType: string, value: any[]) {
+    constructor(config: RemoteUiEditorConfiguration, listType: string, private possibleValues: RemoteUiPossibleValue[] | null | undefined, value: any[]) {
         this.config = config;
         this.listType = listType;
         if (value == null || !Array.isArray(value)) {
@@ -185,7 +185,7 @@ export class RemoteUiListStore implements IRemoteUiData {
             return;
         }
         this.elements = observable.array(value.map(element => new RemoteUiListItem(
-            getControlForType(config, listType, null, null, null, null, element))));
+            getControlForType(config, listType, null, null, null, possibleValues, element))));
     }
 
     getData(): any {
@@ -209,7 +209,7 @@ export class RemoteUiListStore implements IRemoteUiData {
     {
         this.elements.push(
             new RemoteUiListItem(
-                getControlForType(this.config, this.listType, null, null, null, null, null)));
+                getControlForType(this.config, this.listType, null, null, null, this.possibleValues, null)));
     }
 
     @action removeItem(item: RemoteUiListItem) {

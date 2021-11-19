@@ -385,10 +385,15 @@ namespace RemoteUi
                     field["nullable"] = true;
                 if (listType != null)
                     field["listType"] = listType;
+
                 if (type.Equals(RemoteUiFieldType.Radio)              ||
                     type.Equals(RemoteUiFieldType.Select)             ||
                     type.Equals(RemoteUiFieldType.OrderedMultiSelect) ||
-                    type.Equals(RemoteUiFieldType.Custom))
+                    type.Equals(RemoteUiFieldType.Custom) ||
+                    listType == RemoteUiFieldType.Radio.ToString()              ||
+                    listType == RemoteUiFieldType.Select.ToString()             ||
+                    listType == RemoteUiFieldType.OrderedMultiSelect.ToString() ||
+                    listType == RemoteUiFieldType.Custom.ToString())
                 {
                     var lst = new List<object>();
 
@@ -413,7 +418,7 @@ namespace RemoteUi
 
                     field["possibleValues"] = JToken.FromObject(lst);
                 }
-
+                
                 grp.Fields.Add(field);
             }
 
