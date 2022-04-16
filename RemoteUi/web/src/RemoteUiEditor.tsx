@@ -319,12 +319,13 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
     };
     const error = props.item.error || (props.remoteUiEditorContext!.highlightErrors && !props.item.isValid);
     const labelClass = error ? "remote-ui-error" : "";
+    const disabled = props.disabled || props.item.readOnly;
 
     if (props.item.control instanceof RemoteUiCheckboxStore)
         return <div>
             <Error error={props.item.error}/>
             <label className={"form-check-label " + labelClass}>
-                <RemoteUiCheckbox store={props.item.control} disabled={props.disabled} /> {props.item.name}
+                <RemoteUiCheckbox store={props.item.control} disabled={disabled} /> {props.item.name}
             </label>
             <Description/>
         </div>;
@@ -337,7 +338,7 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
             {props.item.isExpanded
                 ? <>
                     <Description/>
-                    <RemoteUiItemEditor store={props.item.control} disabled={props.disabled}/>
+                    <RemoteUiItemEditor store={props.item.control} disabled={disabled}/>
                 </>
                 : null}
         </div>;
@@ -345,7 +346,7 @@ const RemoteUiField = inject("remoteUiEditorContext")(observer(function (props: 
         {isNullOrWhitespace(props.item.name) ? null :  <label className={labelClass}>{props.item.name}</label>}
         <Description/>
         <Error error={props.item.error}/>
-        <RemoteUiItemEditor store={props.item.control} disabled={props.disabled}/>
+        <RemoteUiItemEditor store={props.item.control} disabled={disabled}/>
     </div>;
 }));
 

@@ -40,7 +40,8 @@ export interface RemoteUiFieldDefinition {
     possibleValues?: RemoteUiPossibleValue[],
     nullable?: boolean,
     customType: string,
-    alwaysExpanded: boolean
+    alwaysExpanded: boolean,
+    readOnly: boolean,
 }
 
 export interface RemoteUiFieldGroupDefinition {
@@ -304,7 +305,9 @@ export class RemoteUiFieldStore implements IRemoteUiData {
     @observable control: IRemoteUiData;
     @observable isExpanded: boolean;
     @observable alwaysExpanded: boolean;
+    @observable readOnly: boolean;
     @observable error?: string;
+
     @computed get isValid(){
         return this.control.isValid  
     }
@@ -314,6 +317,7 @@ export class RemoteUiFieldStore implements IRemoteUiData {
         this.name = definition.name;
         this.description = definition.description;
         this.control = control;
+        this.readOnly = definition.readOnly;
         this.isExpanded = this.alwaysExpanded = definition.alwaysExpanded;
     }
 
