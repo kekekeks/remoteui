@@ -37,6 +37,7 @@ namespace RemoteUi
         public bool Nullable { get; set; }
         public string Description { get; set; }
         public bool AlwaysExpanded { get; set; }
+        public bool ReadOnly { get; set; }
 
         public RemoteUiField(string name, string group, RemoteUiFieldType type)
         {
@@ -375,7 +376,8 @@ namespace RemoteUi
                     ["id"] = _namingStrategy.GetPropertyName(prop.Name, false),
                     ["type"] = type.ToString(),
                     ["description"] = description,
-                    ["alwaysExpanded"] = attr?.AlwaysExpanded == true
+                    ["alwaysExpanded"] = attr?.AlwaysExpanded == true,
+                    ["readOnly"] = attr?.ReadOnly ?? false,
                 };
                 if (attr?.CustomType != null)
                     field["customType"] = attr.CustomType;
