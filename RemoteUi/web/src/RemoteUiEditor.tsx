@@ -164,6 +164,7 @@ const SortableItem = observer(SortableElement(observer((props: SortableItemProps
                 </td>
                 <td className="remote-ui-list-item-remove"><a href="#" className="btn btn-danger" onClick={e => {
                     e.preventDefault();
+                    if (props.disabled) return;
                     props.store.removeItem(props.item);
                 }}>X</a></td>
             </tr>
@@ -198,11 +199,13 @@ const RemoteUiList = observer(function (props: RemoteUiListProps) {
         <SortableList store={props.store}
                       disabled={props.disabled}
                       onSortEnd={sort => {
+                          if (props.disabled) return;
                           props.store.reorder(sort.oldIndex, sort.newIndex);
                       }}
                       useDragHandle={true}/>
         <a href="#" className="btn btn-success" onClick={e => {
             e.preventDefault();
+            if (props.disabled) return;
             props.store.addItem();
         }}><b>+</b></a>
     </div>;
