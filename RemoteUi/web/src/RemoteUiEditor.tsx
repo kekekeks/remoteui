@@ -150,7 +150,7 @@ const RemoteUiSelect = inject("remoteUiEditorContext")(observer(function (props:
 type SortableItemProps = {
     store: RemoteUiListStore,
     item: RemoteUiListItem,
-    disabled?: boolean,
+    effectivelyDisabled?: boolean,
 }
 
 const SortableItem = observer(SortableElement(observer((props: SortableItemProps) : any => {
@@ -160,11 +160,11 @@ const SortableItem = observer(SortableElement(observer((props: SortableItemProps
                 <Handle/>
                 <td>
                     <Error error={props.item.error}/>
-                    <RemoteUiItemEditor disabled={props.disabled} store={props.item.item}/>
+                    <RemoteUiItemEditor disabled={props.effectivelyDisabled} store={props.item.item}/>
                 </td>
                 <td className="remote-ui-list-item-remove"><a href="#" className="btn btn-danger" onClick={e => {
                     e.preventDefault();
-                    if (props.disabled) return;
+                    if (props.effectivelyDisabled) return;
                     props.store.removeItem(props.item);
                 }}>X</a></td>
             </tr>
@@ -181,6 +181,7 @@ type SortableListProps = {
 const SortableList = observer(SortableContainer(observer((props: SortableListProps) : any => {
     return <div>
         {props.store.elements.map((item, idx) => <SortableItem index={idx} key={item.id} item={item}
+                                                               effectivelyDisabled={props.disabled}
                                                                disabled={props.disabled}
                                                                store={props.store}/>
         )}
