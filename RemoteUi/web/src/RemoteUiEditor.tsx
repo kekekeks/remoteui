@@ -252,10 +252,12 @@ type RemoteUiFileBase64Props = {
                             {i.nullable ?
                                 <a href="#" className="btn btn-danger" onClick={e => {
                                     e.preventDefault();
+                                    if (this.props.disabled) return;
                                     i.delete();
                                 }}>X</a> : null}&nbsp;
                             <a href="#" className="btn btn-primary" onClick={e => {
                                 e.preventDefault();
+                                if (this.props.disabled) return;
                                 selectFile();
                             }}>Replace</a>
                         </td>
@@ -295,6 +297,7 @@ const RemoteUiNullable = observer(function (props: RemoteUiNullableProps) : any 
                 </td>
                 <td className="remote-ui-list-item-remove"><a href="#" className="btn btn-danger" onClick={e => {
                     e.preventDefault();
+                    if (props.disabled) return;
                     i.deleteInner();
                 }}>X</a></td>
             </tr>
@@ -303,6 +306,7 @@ const RemoteUiNullable = observer(function (props: RemoteUiNullableProps) : any 
     return <div className="remote-ui-nullable-add-container"
                 onClick={e => {
                     e.preventDefault();
+                    if (props.disabled) return;
                     i.createInner();
                 }}>
         <a href="#" className="btn btn-success" ><b>+</b></a>
