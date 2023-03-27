@@ -404,7 +404,7 @@ namespace RemoteUi
                         lst.Add(new
                         {
                             id = radioAttr.Id,
-                            name = radioAttr.Name
+                            name = displayResolver != null ? displayResolver(radioAttr.Name) : radioAttr.Name,
                         });
                     }
 
